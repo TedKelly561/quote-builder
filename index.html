@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Builder · Ted Kelly</title>
+<meta name="description" content="Build a professional service quote in a minute: price book, Good/Better/Best options, owner margin check and a customer approval link. A demo by Ted Kelly with fictional data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/demo.css">
+<link rel="stylesheet" href="app.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="demo-bar no-print"><a href="https://tedkelly.dev/">← Ted Kelly</a><span class="pill">DEMO</span><span>Fictional company &amp; data</span><span class="spacer"></span><a href="https://github.com/TedKelly561/quote-builder">View code</a></div>
+
+<!-- ============ BUILDER (office / tech view) ============ -->
+<div id="builder-view">
+  <header class="app-head no-print">
+    <div class="co">Summit Home Services · Service toolkit</div>
+    <h1>Quote Builder</h1>
+    <p>Build a written quote from the price book in about a minute. The trip charge is never forgotten, parts are priced at your markup, and the owner sees the margin before the customer sees the price.</p>
+  </header>
+
+  <main class="wrap" id="builder">
+    <div class="toolbar card" role="region" aria-label="Quote toolbar">
+      <div class="tb-id">
+        <span class="tb-num mono" id="tbNumber">Q-0000</span>
+        <span class="chip" id="tbStatus">Draft</span>
+        <span class="tb-saved muted" id="tbSaved" aria-live="polite">Saved</span>
+      </div>
+      <div class="tb-actions">
+        <label class="sr-only" for="statusSelect">Quote status</label>
+        <select id="statusSelect" class="tb-select">
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+          <option value="approved">Approved</option>
+          <option value="declined">Declined</option>
+        </select>
+        <button class="btn ghost small" type="button" id="btnNew">+ New quote</button>
+        <a class="btn ghost small" href="#saved" id="btnSavedJump">Saved quotes <span class="count" id="savedCount">0</span></a>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="editor" aria-label="Quote editor">
+
+        <!-- Customer & job -->
+        <div class="card section">
+          <div class="sec-head"><h2><span class="step">1</span>Customer &amp; job</h2></div>
+          <div class="fields">
+            <div class="f f-2">
+              <label for="custName">Customer</label>
+              <input id="custName" list="custList" autocomplete="off" placeholder="Start typing a name or enter a new customer">
+              <datalist id="custList"></datalist>
+              <small class="hint" id="custHint">Pick an existing customer or type a new one.</small>
+            </div>
+            <div class="f">
+              <label for="custPhone">Phone</label>
+              <input id="custPhone" inputmode="tel" placeholder="(555) 000-0000">
+            </div>
+            <div class="f">
+              <label for="custAddress">Service address</label>
+              <input id="custAddress" placeholder="Street address">
+            </div>
+            <div class="f f-2">
+              <label for="issue">Job / issue description</label>
+              <textarea id="issue" rows="3" placeholder="What the customer reported and what the tech found"></textarea>
+            </div>
+            <div class="f">
+              <label for="tech">Technician</label>
+              <select id="tech"></select>
+            </div>
+            <div class="f">
+              <label for="qnum">Quote number</label>
+              <input id="qnum" class="mono" readonly aria-readonly="true">
+            </div>
+            <div class="f">
+              <label for="qdate">Quote date</label>
+              <input id="qdate" type="date">
+            </div>
+            <div class="f">
+              <label for="qvalid">Valid until</label>
+              <input id="qvalid" type="date">
+            </div>
+          </div>
+        </div>
+
+        <!-- Line items -->
+        <div class="card section">
+          <div class="sec-head">
+            <h2><span class="step">2</span>Line items</h2>
+          </div>
+
+          <div class="quick">
+            <span class="quick-label">Quick start</span>
+            <div class="quick-row" id="templates" role="group" aria-label="Job templates"></div>
+          </div>
+
+          <div class="opt-tabs" id="optTabs" role="tablist" aria-label="Quote options" hidden></div>
+          <div class="opt-title" id="optTitleRow" hidden>
+            <label for="optTitle">Option title the customer sees</label>
+            <input id="optTitle" placeholder="e.g. Repair, Replace, Replace + maintenance plan">
+          </div>
+
+          <div class="lines" id="lines" aria-live="polite"></div>
+
+          <div class="line-actions">
+            <button class="btn small" type="button" id="btnAddItem">+ Add from price book</button>
+            <button class="btn ghost small" type="button" id="btnAddCustom">+ Custom line</button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="card section">
+          <div class="sec-head"><h2><span class="step">3</span>Pricing options</h2></div>
+          <div class="opts">
+            <div class="opt-row">
+              <div>
+                <div class="opt-name" id="ahLabel">After-hours rate</div>
+                <div class="muted small" id="ahDesc">Switches labor to the nights &amp; weekends rate.</div>
+              </div>
+              <label class="switch"><input type="checkbox" role="switch" id="afterHours" aria-labelledby="ahLabel" aria-describedby="ahDesc"><span class="track" aria-hidden="true"></span></label>
+            </div>
+
+            <div class="opt-row">
+              <div>
+                <div class="opt-name" id="gbbLabel">Good / Better / Best</div>
+                <div class="muted small" id="gbbDesc">Show the customer up to three packages side by side, like repair vs. replace.</div>
+              </div>
+              <label class="switch"><input type="checkbox" role="switch" id="gbb" aria-labelledby="gbbLabel" aria-describedby="gbbDesc"><span class="track" aria-hidden="true"></span></label>
+            </div>
+
+            <div class="opt-block">
+              <div class="opt-name">Discount</div>
+              <div class="disc-presets" role="group" aria-label="Discount presets" id="discPresets"></div>
+              <div class="disc-grid">
+                <div>
+                  <label for="discType">Type</label>
+                  <select id="discType">
+                    <option value="none">No discount</option>
+                    <option value="pct">Percent (%)</option>
+                    <option value="amt">Dollar amount ($)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="discValue">Amount</label>
+                  <input id="discValue" type="number" min="0" step="0.01" inputmode="decimal">
+                </div>
+                <div class="disc-label">
+                  <label for="discLabel">Shown as</label>
+                  <input id="discLabel" placeholder="e.g. Senior / veteran discount">
+                </div>
+              </div>
+            </div>
+
+            <div class="opt-row tax-row">
+              <div>
+                <div class="opt-name">Sales tax</div>
+                <div class="muted small" id="taxDesc">Parts and materials only. Labor and service fees are not taxed.</div>
+              </div>
+              <span class="chip mono" id="taxChip">8.25%</span>
+            </div>
+
+            <div class="opt-block">
+              <label for="terms">Terms shown on the quote</label>
+              <textarea id="terms" rows="4"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side" aria-label="Totals and margin">
+        <div class="side-sticky">
+          <div class="card totals" id="totals" aria-live="polite"></div>
+
+          <div class="card owner" id="ownerCard">
+            <div class="owner-head">
+              <h2>Owner view</h2>
+              <span class="hidden-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.4 5.2A9.7 9.7 0 0 1 12 5c5 0 9 4.5 10 7-.4 1-1.3 2.4-2.6 3.7M6.1 6.1C4 7.5 2.6 9.6 2 12c1 2.5 5 7 10 7 1.6 0 3.1-.4 4.4-1.1"/></svg>Hidden from customer</span>
+            </div>
+            <div id="owner"></div>
+            <div class="owner-set">
+              <label for="laborCost">Tech labor cost per hour (wages + burden)</label>
+              <div class="money-input"><span aria-hidden="true">$</span><input id="laborCost" type="number" min="0" step="1" inputmode="decimal"></div>
+            </div>
+          </div>
+
+          <div class="card send">
+            <h2>Send to customer</h2>
+            <div class="send-btns">
+              <button class="btn" type="button" id="btnCopyLink">Copy approval link</button>
+              <button class="btn ghost" type="button" id="btnPrint">Print / Save PDF</button>
+              <a class="btn ghost" href="#preview">Preview quote ↓</a>
+            </div>
+            <div class="linkbox" id="linkBox" hidden>
+              <label for="linkOut">Approval link</label>
+              <input id="linkOut" readonly class="mono">
+              <div class="row small"><span class="muted" id="linkMsg">Copied to clipboard.</span><a id="linkOpen" href="#" target="_blank" rel="noopener">Open customer view ↗</a></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="preview" id="preview" aria-label="Customer preview">
+      <div class="preview-head">
+        <div>
+          <h2>Customer preview</h2>
+          <p class="muted small">Exactly what the customer gets. Costs and margin never leave the owner view.</p>
+        </div>
+        <div class="row">
+          <button class="btn ghost small" type="button" id="btnPrint2">Print / Save PDF</button>
+          <button class="btn small" type="button" id="btnCopyLink2">Copy approval link</button>
+        </div>
+      </div>
+      <div class="paper-wrap"><article class="paper print-root" id="doc"></article></div>
+    </section>
+
+    <section class="saved card" id="saved" aria-label="Saved quotes">
+      <div class="sec-head">
+        <h2>Saved quotes</h2>
+        <span class="muted small">Stored in this browser</span>
+      </div>
+      <div class="saved-filter" role="group" aria-label="Filter by status" id="savedFilter"></div>
+      <div id="savedList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ CUSTOMER VIEW (opened from approval link) ============ -->
+<div id="customer-view" hidden>
+  <main class="wrap cust-wrap">
+    <div class="cust-banner no-print" role="note">
+      <strong>Demo:</strong> this is the page your customer sees when they open the approval link. Approvals are saved in this browser only.
+      <a href="./" id="backToBuilder">Back to Quote Builder</a>
+    </div>
+    <div class="cust-layout">
+      <article class="paper print-root" id="custDoc"></article>
+      <aside class="cust-panel no-print" id="custPanel" aria-label="Respond to this quote"></aside>
+    </div>
+  </main>
+</div>
+
+<!-- Price book picker -->
+<dialog id="picker" aria-labelledby="pickerTitle">
+  <form method="dialog" class="picker-inner">
+    <div class="picker-head">
+      <h2 id="pickerTitle">Add from price book</h2>
+      <button class="icon-btn" value="close" aria-label="Close price book">✕</button>
+    </div>
+    <label class="sr-only" for="pickerSearch">Search the price book</label>
+    <input id="pickerSearch" type="search" placeholder="Search parts, labor, fees… (e.g. capacitor, pump)" autocomplete="off">
+    <div class="picker-tabs" role="group" aria-label="Filter by trade" id="pickerTabs"></div>
+    <div class="picker-list" id="pickerList"></div>
+    <p class="muted small picker-foot">Parts are priced at cost + <span id="markupPct">45</span>% markup from the price book. You can change any price on the quote.</p>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toastMsg"></span><button type="button" id="toastUndo" hidden>Undo</button></div>
+
+<footer class="demo-foot no-print">Summit Home Services is a fictional company. Every customer, price and quote here is made up for demonstration. Built by <a href="https://tedkelly.dev/">Ted Kelly</a>.</footer>
+
+<script src="shared/data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
