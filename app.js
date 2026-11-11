@@ -434,12 +434,14 @@ if (typeof document !== 'undefined') (function () {
       ${q.afterHours ? `<div class="nudge info">After-hours labor rate applied.</div>` : ''}`;
 
     // Owner panel
-    const band = M.marginBand(c.margin);
+    // Items but nothing left to charge (e.g. a discount as big as the subtotal) is not "no items".
+    const band = c.margin == null && o.lines.length ? 'bad' : M.marginBand(c.margin);
     const pct = c.margin == null ? '–' : (c.margin * 100).toFixed(1) + '%';
     const markupReal = c.partsCost > 0 ? ((c.parts - c.partsCost) / c.partsCost * 100).toFixed(0) + '% markup' : '';
     const warns = o.lines.map(lineWarn).filter(Boolean);
     let hint;
     if (band === 'none') hint = 'Add line items to see the margin.';
+    else if (c.margin == null) hint = 'Nothing left to charge: the quote comes to $0 before tax. Check the prices and the discount.';
     else if (band === 'bad') hint = warns.length ? 'Margin below target: check parts pricing. ' + warns.length + ' part' + (warns.length > 1 ? 's are' : ' is') + ' under the book price.' : 'Margin below target: check parts pricing, labor hours and the discount.';
     else if (band === 'warn') hint = q.gbb ? 'Margin is OK but under the 50% goal. Make sure the Better/Best options carry it.' : 'Margin is OK but under the 50% goal. Consider offering a Better/Best option.';
     else hint = 'Healthy margin. Good to send.';
