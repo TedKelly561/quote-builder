@@ -721,7 +721,9 @@ if (typeof document !== 'undefined') (function () {
       touch(); renderOptions(); renderTotals(); renderTabs();
       if (q.discount.type !== 'none') $('discValue').focus();
     });
-    $('discValue').addEventListener('input', e => { q.discount.value = Number(e.target.value) || 0; touch(); renderTotals(); markPresets(); });
+    $('discValue').addEventListener('input', e => { q.discount.value = Math.max(0, Number(e.target.value) || 0); touch(); renderTotals(); markPresets(); });
+    // A discount can't be negative: once the field is left, show the 0 that the totals actually use.
+    $('discValue').addEventListener('change', e => { if (e.target.value !== '' && !(Number(e.target.value) >= 0)) e.target.value = q.discount.value; });
     $('discLabel').addEventListener('input', e => { q.discount.label = e.target.value; touch(); renderTotals(); });
     $('discPresets').addEventListener('click', e => {
       const b = e.target.closest('.pchip'); if (!b) return;
